@@ -24,3 +24,11 @@ Inside the launcher: swipe up on the lock screen, swipe left and right between p
 pull down the top handle for quick settings, long-press an app for App info or Uninstall,
 More > Style for colour, wallpaper and icons.
 To go back to your old launcher: Settings > Apps > Default apps > Home app.
+
+NEW IN THIS VERSION
+Hub (swipe right from the home page): your notifications in one place, with badges on app icons and rows on the lock screen.
+Style > Make all of Android BlackBerry: checklist for default home screen, dark theme, Hub and a BlackBerry wallpaper
+for the real home and lock screens (Android 12+ then colours the system to match).
+Hub needs a one-time permission: Settings > Notification access > TCS Hub. On Android 13+, if it is greyed out,
+open Settings > Apps > TCS Home > menu (three dots) > Allow restricted settings, then try again.
+Installing an update: uninstall the old TCS Home first, because each cloud build is signed with a new test key.

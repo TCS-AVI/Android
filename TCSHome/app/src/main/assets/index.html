@@ -45,6 +45,10 @@ body.locked #home{transform:scale(.94);opacity:.5}body.launching #home{transform
 body.mono .ap u img{filter:grayscale(1) contrast(1.15) brightness(1.05)}
 .ap:active u{transform:scale(.92);border-color:var(--ac);box-shadow:0 0 0 1px var(--ac)}
 /* bar */
+.ap u{position:relative}.bd{position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;padding:0 4px;background:var(--ac);color:#000;font:600 12px/20px sans-serif;text-align:center;font-style:normal}
+.hr{display:flex;gap:10px;align-items:flex-start;background:var(--sf);border-left:3px solid var(--ac);padding:11px 12px;margin-bottom:6px;cursor:pointer}.hr div{flex:1;min-width:0}.hr small{display:block;color:var(--mu);font-size:11px;margin-bottom:2px}.hr b{display:block;font-weight:400;font-size:15px}.hr p{color:#c3c7ce;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hr .ib{width:32px;height:32px}
+.btn{all:unset;cursor:pointer;background:var(--ac);color:#000;padding:11px 16px;font-size:14px}.sbtn{all:unset;cursor:pointer;background:var(--sf2);padding:9px 12px;font-size:13px;flex:none}.st{font-size:18px;color:var(--ac);width:22px;text-align:center;flex:none}.st.no{color:#e5384f}
+.note{background:var(--sf);border-left:4px solid var(--ac);padding:12px;font-size:13px;line-height:1.5;color:#c9ccd2;margin-top:8px}
 .bar{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-around;background:linear-gradient(180deg,#16181c,#0b0c0e);padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));border-top:1px solid #2a2e36;z-index:5}
 .bar button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--mu);padding:2px 12px}
 .bar .ic{width:24px;height:24px;color:var(--tx)}.bar button:active .ic{color:var(--ac)}
@@ -115,7 +119,7 @@ h3{font-weight:300;font-size:15px;color:var(--mu);margin:20px 0 10px}h3:first-ch
 <div id="hint"><i></i>Swipe up to unlock</div></div>
 
 <div id="home"><div id="sb"><i></i><span id="sbt" hidden></span><span id="bat" hidden></span></div>
-<div id="pager"><section class="pg" id="p0"><div class="frames">
+<div id="pager"><section class="pg" id="ph"><div class="oh" style="padding:2px 0 10px"><h2>Hub</h2><button class="sbtn" data-k="hubclear">Clear all</button></div><div id="hl"></div></section><section class="pg" id="p0"><div class="frames">
 <div class="fr w"><svg class="ic"><use href="#clock"/></svg><b id="fc">00:00</b><span id="fd"></span></div>
 <div class="fr"><svg class="ic"><use href="#batt"/></svg><b id="f1">–</b>Battery<i class="mb"><s id="m1"></s></i></div>
 <div class="fr"><svg class="ic"><use href="#chip"/></svg><b id="f2">–</b>Memory free<i class="mb"><s id="m2"></s></i></div>
@@ -133,7 +137,14 @@ h3{font-weight:300;font-size:15px;color:var(--mu);margin:20px 0 10px}h3:first-ch
 <div class="ov" id="style"><div class="oh"><button class="ib" data-k="closestyle"><svg class="ic"><use href="#back"/></svg></button><h2>Style</h2></div><div class="ob">
 <h3>Accent colour</h3><div class="dots" id="acs"></div>
 <h3>Wallpaper</h3><div class="seg" id="wps"><button data-w="0">Black</button><button data-w="1">Glow</button><button data-w="2">Carbon</button></div>
+<h3>Make all of Android BlackBerry</h3>
+<div class="row"><div>Home screen<small>TCS Home is your default launcher</small></div><span class="st" id="s_home"></span><button class="sbtn" data-a="android.settings.HOME_SETTINGS">Set</button></div>
+<div class="row"><div>Dark theme<small>Settings, menus and apps turn dark</small></div><span class="st" id="s_dark"></span><button class="sbtn" data-a="android.settings.DISPLAY_SETTINGS">Open</button></div>
+<div class="row"><div>Hub<small>Notifications in Hub, on the lock screen and as icon badges</small></div><span class="st" id="s_hub"></span><button class="sbtn" data-a="android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS">Turn on</button></div>
+<div class="row"><div>Wallpaper<small>Sets your home and lock screen in the accent colour</small></div><span class="st" id="s_wall"></span><button class="sbtn" data-k="applywall">Apply</button></div>
+<div class="note">After the wallpaper is set, Android 12 and newer colours the quick panel, buttons and Settings to match it: open Settings, Wallpaper and style, and choose the wallpaper colours. On Android 13 and newer, turn on Themed icons there too.</div>
 <h3>Options</h3>
+<div class="row"><div>Notifications on lock screen</div><button class="ib" data-t="lockn"><svg class="ic"><use href="#ok"/></svg></button></div>
 <div class="row"><div>24-hour clock</div><button class="ib" data-t="h24"><svg class="ic"><use href="#ok"/></svg></button></div>
 <div class="row"><div>QNX mono icons<small>Turns app icons grey like BlackBerry 10</small></div><button class="ib" data-t="mono"><svg class="ic"><use href="#ok"/></svg></button></div>
 <div class="row"><div>Lock when the screen turns off</div><button class="ib" data-t="auto"><svg class="ic"><use href="#ok"/></svg></button></div>
@@ -147,7 +158,8 @@ h3{font-weight:300;font-size:15px;color:var(--mu);margin:20px 0 10px}h3:first-ch
 <script>
 var $=function(i){return document.getElementById(i)},LS={g:function(k,d){try{var v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},s:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 var T=window.TCS,AC=["#00a8df","#ff9933","#19a974","#e5384f","#8e5bff","#f2c500"];
-var S=LS.g('st2',{ac:AC[0],h24:true,mono:true,wp:0,auto:true,hap:true});function sv(){LS.s('st2',S)}
+var S=Object.assign({ac:AC[0],h24:true,mono:true,wp:0,auto:true,hap:true,lockn:true},LS.g('st2',{}));function sv(){LS.s('st2',S)}
+function rgba(h,a){var n=parseInt(h.slice(1),16);return 'rgba('+(n>>16)+','+((n>>8)&255)+','+(n&255)+','+a+')'}
 var ico=function(n){return '<svg class="ic"><use href="#'+n+'"/></svg>'};
 var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
 var tt;function toast(m){var t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(tt);tt=setTimeout(function(){t.style.display='none'},2200)}
@@ -157,7 +169,7 @@ var QS=[["Wi-Fi","wifi","android.settings.WIFI_SETTINGS"],["Bluetooth","bt","and
 $('qg').innerHTML=QS.map(function(p){return '<button class="qt" data-a="'+p[2]+'">'+ico(p[1])+p[0]+'</button>'}).join('')+'<button class="qt" data-k="style">'+ico('pal')+'Style</button><button class="qt" data-k="lock">'+ico('lockic')+'Lock</button>';
 
 var H=document.body,L=$('lock'),Q=$('qs'),P=$('pager');
-function apply(){document.documentElement.style.setProperty('--ac',S.ac);var n=parseInt(S.ac.slice(1),16);document.documentElement.style.setProperty('--acg','rgba('+(n>>16)+','+((n>>8)&255)+','+(n&255)+',.32)');H.classList.toggle('mono',S.mono);H.dataset.wp=S.wp;
+function apply(){document.documentElement.style.setProperty('--ac',S.ac);document.documentElement.style.setProperty('--acg',rgba(S.ac,.32));H.classList.toggle('mono',S.mono);H.dataset.wp=S.wp;
 Array.prototype.forEach.call($('acs').children,function(d){d.classList.toggle('on',d.dataset.c===S.ac)});
 Array.prototype.forEach.call($('wps').children,function(d){d.classList.toggle('on',+d.dataset.w===S.wp)});
 document.querySelectorAll('[data-t]').forEach(function(b){b.classList.toggle('on',!!S[b.dataset.t])});tick();sv()}
@@ -173,7 +185,8 @@ $('f4').textContent=d.getDate();$('f4t').textContent=d.toLocaleDateString(undefi
 setInterval(tick,10000);
 
 function fill(a,b,v){if(v==null||isNaN(v))return;$(a).textContent=v+'%';$(b).style.width=v+'%'}
-function nl(rows){$('nl').innerHTML=rows.map(function(r){return '<div class="nr">'+ico(r[0])+r[1]+'<span>'+r[2]+'</span></div>'}).join('')}
+var SR=[];function nl(rows){SR=rows;lockRows()}
+function lockRows(){var r=[];if(S.lockn&&HUBON)HUB.slice(0,3).forEach(function(h){r.push(['msg',esc(h.a),esc(h.t||h.x).slice(0,28)])});r=r.concat(SR);$('nl').innerHTML=r.map(function(x){return '<div class="nr">'+ico(x[0])+x[1]+'<span>'+x[2]+'</span></div>'}).join('')}
 function sysU(){var o=null;if(T){try{o=JSON.parse(T.sys())}catch(e){}}
 if(o){var p=o.l+'%'+(o.c?' ⚡':'');$('bat').textContent=$('lbat').textContent=p;fill('f1','m1',o.l);fill('f2','m2',o.ram);fill('f3','m3',o.st);nl([['batt','Battery',p],['chip','Memory free',o.ram+'%'],['disk','Storage free',o.st+'%']])}
 else if(navigator.getBattery){navigator.getBattery().then(function(b){var v=Math.round(b.level*100),p=v+'%'+(b.charging?' ⚡':'');$('bat').textContent=$('lbat').textContent=p;fill('f1','m1',v);nl([['batt','Battery',p]])}).catch(function(){})}}
@@ -181,15 +194,29 @@ else if(navigator.getBattery){navigator.getBattery().then(function(b){var v=Math
 var SAMPLE=[["Phone","phone"],["Messages","msg"],["Mail","mail"],["Camera","cam"],["Gallery","img"],["Clock","clock"],["Calculator","calc"],["Calendar","cal"],["Files","folder"],["Maps","pin"],["Music","music"],["Settings","gear"]];
 var APPS=[];
 function tile(a,i){return '<button class="ap" data-i="'+i+'"><u>'+(a.i?'<img alt="" src="data:image/png;base64,'+a.i+'">':ico(a.s))+'</u><span>'+esc(a.n)+'</span></button>'}
-function load(){if(T){try{APPS=JSON.parse(T.apps())}catch(e){APPS=[]}}else APPS=SAMPLE.map(function(s){return{n:s[0],s:s[1]}});render()}
+function load(){if(T){try{APPS=JSON.parse(T.apps())}catch(e){APPS=[]}}else APPS=SAMPLE.map(function(s){return{n:s[0],s:s[1],p:'x.'+s[0]}});render();if(!window._f){window._f=1;P.scrollLeft=P.clientWidth;dots()}}
 function render(){var rows=Math.max(3,Math.floor((P.clientHeight-170)/104)),per=rows*4;
 P.querySelectorAll('.app-pg').forEach(function(n){n.remove()});
 for(var i=0;i<APPS.length;i+=per){var s=document.createElement('section');s.className='pg app-pg';s.innerHTML='<div class="grid">'+APPS.slice(i,i+per).map(function(a,j){return tile(a,i+j)}).join('')+'</div>';P.appendChild(s)}
-dots()}
+dots();badges()}
 window.refreshApps=load;addEventListener('resize',function(){render()});
 function dots(){var n=P.children.length,w=P.clientWidth||1,c=Math.round(P.scrollLeft/w),h='';for(var i=0;i<n;i++)h+='<i'+(i===c?' class="on"':'')+'></i>';$('dots').innerHTML=h}
 P.addEventListener('scroll',dots,{passive:true});
 
+var SAMPLEHUB=[{k:'1',p:'x.Messages',a:'Messages',t:'Rohan',x:'Dinner at 8?',w:Date.now()-120000},{k:'2',p:'x.Calendar',a:'Calendar',t:'Meeting in 30 minutes',x:'Today, 4:00 pm',w:Date.now()-900000},{k:'3',p:'x.Mail',a:'Mail',t:'Welcome to TCS Home',x:'Your BlackBerry style launcher is ready',w:Date.now()-3600000}];
+var HUB=[],HUBON=false;
+function ago(w){var m=Math.round((Date.now()-w)/60000);return m<1?'now':m<60?m+' min':m<1440?Math.floor(m/60)+' h':new Date(w).toLocaleDateString()}
+function hubLoad(){if(T){try{HUBON=!!T.hubOn();HUB=HUBON?JSON.parse(T.hub()):[]}catch(e){HUB=[];HUBON=false}}else{HUBON=true;HUB=SAMPLEHUB.slice()}
+$('hl').innerHTML=!HUBON?'<div class="note" style="margin:0">Hub puts all your notifications in one place, like BlackBerry 10. Turn it on once in Android settings.<br><br><button class="btn" data-a="android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS">Turn on Hub</button></div>':(HUB.length?HUB.map(function(h){return '<div class="hr" data-k2="'+esc(h.k)+'"><div><small>'+esc(h.a)+' · '+ago(h.w)+'</small><b>'+esc(h.t||h.a)+'</b><p>'+esc(h.x)+'</p></div><button class="ib" data-x="'+esc(h.k)+'">'+ico('ok')+'</button></div>'}).join(''):'<div class="note" style="margin:0">No new notifications.</div>');
+lockRows();badges();statU()}
+window.hubChanged=hubLoad;
+function badges(){var c={};HUB.forEach(function(h){c[h.p]=(c[h.p]||0)+1});document.querySelectorAll('.ap').forEach(function(a){var p=APPS[+a.dataset.i],u=a.firstChild,b=u.querySelector('.bd'),n=p&&c[p.p]||0;if(n){if(!b){b=document.createElement('i');b.className='bd';u.appendChild(b)}b.textContent=n}else if(b)b.remove()})}
+function mark(id,v){var e=$(id);e.textContent=v?'✓':'✗';e.className='st'+(v?'':' no')}
+function statU(){var o=null;if(T){try{o=JSON.parse(T.status())}catch(e){}}
+mark('s_home',o?o.home:false);mark('s_dark',o?o.dark:matchMedia('(prefers-color-scheme: dark)').matches);mark('s_hub',HUBON&&!!T);mark('s_wall',LS.g('wall',false))}
+function wallImg(){var c=document.createElement('canvas');c.width=1080;c.height=2400;var x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,1080,2400);
+if(S.wp===2){x.strokeStyle='#15181d';x.lineWidth=4;for(var i=-2400;i<1080;i+=10){x.beginPath();x.moveTo(i,0);x.lineTo(i+2400,2400);x.stroke()}}
+var g=x.createRadialGradient(540,2550,0,540,2550,1600);g.addColorStop(0,S.ac);g.addColorStop(.5,rgba(S.ac,.4));g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,1080,2400);return c.toDataURL('image/jpeg',.88).split(',')[1]}
 var lp=false,lt,cur=null,px=0,py=0;
 document.addEventListener('pointerdown',function(e){var b=e.target.closest('.ap,.bar button,.qt,.ib');if(b)hp();var a=e.target.closest('.ap');if(!a)return;lp=false;px=e.clientX;py=e.clientY;clearTimeout(lt);lt=setTimeout(function(){lp=true;hp();cur=APPS[+a.dataset.i];$('sn').textContent=cur.n;$('sheet').classList.add('open')},550)});
 document.addEventListener('pointermove',function(e){if(Math.abs(e.clientX-px)+Math.abs(e.clientY-py)>12)clearTimeout(lt)});
@@ -202,11 +229,14 @@ function closeAll(){Q.classList.remove('open');$('menu').classList.remove('open'
 function lockNow(){closeAll();L.style.transform='';L.classList.remove('up');H.classList.add('locked')}
 function unlock(){L.style.transform='';$('home').style.transform=$('home').style.opacity='';L.classList.add('up');H.classList.remove('locked');hp()}
 document.addEventListener('click',function(e){var t=e.target;
+var dx=t.closest('[data-x]');if(dx){if(T)T.dismiss(dx.dataset.x);else{HUB=HUB.filter(function(h){return h.k!==dx.dataset.x});SAMPLEHUB=HUB.slice()}hubLoad();return}
+var hr=t.closest('.hr');if(hr){if(T)T.openNotif(hr.dataset.k2);else toast('Preview only. This opens the notification on the phone.');return}
 var a=t.closest('.ap');if(a){if(lp){lp=false;return}var p=APPS[+a.dataset.i];if(T){H.classList.add('launching');setTimeout(function(){try{T.launch(p.p)}catch(x){}},110);setTimeout(function(){H.classList.remove('launching')},1600)}else toast('Preview only. This opens the app on the phone.');closeAll();return}
 var d=t.closest('[data-a]');if(d){act(d.dataset.a);Q.classList.remove('open');return}
 var k=t.closest('[data-k]');if(k){var c=k.dataset.k;
 if(c==='lock')lockNow();else if(c==='menu')$('menu').classList.toggle('open');
-else if(c==='style'){closeAll();$('style').classList.add('open')}else if(c==='closestyle')$('style').classList.remove('open');
+else if(c==='style'){closeAll();$('style').classList.add('open');statU()}else if(c==='closestyle')$('style').classList.remove('open');else if(c==='hubclear'){if(T)HUB.forEach(function(h){T.dismiss(h.k)});else SAMPLEHUB=[];setTimeout(hubLoad,150)}
+else if(c==='applywall'){if(!T){toast('Preview only. This sets the wallpaper on the phone.');return}toast('Setting wallpaper…');setTimeout(function(){var r='error';try{r=T.setWallpaper(wallImg())}catch(x){}if(r==='ok'){LS.s('wall',true);toast('Wallpaper set on home and lock screen')}else toast('Could not set the wallpaper');statU()},60)}
 else if(c==='search'){closeAll();$('srch').classList.add('open');$('q').value='';fq();setTimeout(function(){$('q').focus()},280)}
 else if(c==='closesearch'){$('srch').classList.remove('open');$('q').blur()}return}
 if(!t.closest('#qs,#sb'))Q.classList.remove('open');if(!t.closest('#menu'))$('menu').classList.remove('open');if(!t.closest('#sheet'))$('sheet').classList.remove('open')});
@@ -227,7 +257,7 @@ var sy=null;$('sb').addEventListener('pointerdown',function(e){sy=e.clientY});
 $('sb').addEventListener('pointerup',function(e){if(sy!==null&&e.clientY-sy>20)Q.classList.add('open');else Q.classList.toggle('open');sy=null});
 var qy=null;Q.addEventListener('pointerdown',function(e){qy=e.clientY});Q.addEventListener('pointerup',function(e){if(qy!==null&&qy-e.clientY>25)Q.classList.remove('open');qy=null});
 window.onScreenOff=function(){if(S.auto)lockNow()};
-window.goHome=function(){closeAll();P.scrollTo({left:0,behavior:'smooth'})};
-document.addEventListener('visibilitychange',function(){H.classList.remove('launching');sysU()});addEventListener('focus',function(){H.classList.remove('launching')});
-apply();sysU();setInterval(sysU,30000);setTimeout(load,60);
+window.goHome=function(){closeAll();P.scrollTo({left:P.clientWidth,behavior:'smooth'})};
+document.addEventListener('visibilitychange',function(){H.classList.remove('launching');sysU();hubLoad()});addEventListener('focus',function(){H.classList.remove('launching')});
+apply();sysU();setInterval(sysU,30000);setTimeout(function(){load();hubLoad()},60);setInterval(hubLoad,60000);
 </script></body></html>

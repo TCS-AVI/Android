@@ -2,13 +2,17 @@ package com.tcs.home;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.Notification;
+import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -20,6 +24,7 @@ import android.os.StatFs;
 import android.provider.AlarmClock;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.service.notification.StatusBarNotification;
 import android.util.Base64;
 import android.view.HapticFeedbackConstants;
 import android.webkit.JavascriptInterface;
@@ -41,6 +46,7 @@ import java.util.List;
 
 /** TCS Home: a BlackBerry QNX style launcher. No internet permission, no web links. */
 public class MainActivity extends Activity {
+    static MainActivity cur;
     private WebView web;
     private BroadcastReceiver screenOff, pkgChange;
     private boolean lockPending = false, visible = false;
@@ -48,6 +54,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
+        cur = this;
         web = new WebView(this);
         web.setBackgroundColor(0xFF000000);
         setContentView(web);
@@ -90,7 +97,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void js(String code) {
+    void js(String code) {
         if (web != null) web.post(() -> web.evaluateJavascript(code, null));
     }
 
@@ -190,6 +197,95 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public boolean hubOn() {
+            String en = Settings.Secure.getString(getContentResolver(), "enabled_notification_listeners");
+            return en != null && en.contains(getPackageName());
+        }
+
+        @JavascriptInterface
+        public String hub() {
+            JSONArray out = new JSONArray();
+            HubService h = HubService.inst;
+            if (h == null) return out.toString();
+            try {
+                StatusBarNotification[] all = h.getActiveNotifications();
+                PackageManager pm = getPackageManager();
+                List<StatusBarNotification> l = new ArrayList<>();
+                for (StatusBarNotification s : all) {
+                    if (s.isOngoing()) continue;
+                    if ((s.getNotification().flags & Notification.FLAG_GROUP_SUMMARY) != 0) continue;
+                    if (s.getPackageName().equals(getPackageName())) continue;
+                    l.add(s);
+                }
+                Collections.sort(l, new Comparator<StatusBarNotification>() {
+                    @Override public int compare(StatusBarNotification a, StatusBarNotification b) {
+                        return Long.compare(b.getPostTime(), a.getPostTime());
+                    }
+                });
+                int n = 0;
+                for (StatusBarNotification s : l) {
+                    if (n++ >= 60) break;
+                    Notification nt = s.getNotification();
+                    CharSequence t = nt.extras.getCharSequence(Notification.EXTRA_TITLE);
+                    CharSequence x = nt.extras.getCharSequence(Notification.EXTRA_TEXT);
+                    String app;
+                    try { app = String.valueOf(pm.getApplicationLabel(pm.getApplicationInfo(s.getPackageName(), 0))); }
+                    catch (Exception e) { app = s.getPackageName(); }
+                    out.put(new JSONObject().put("k", s.getKey()).put("p", s.getPackageName()).put("a", app)
+                        .put("t", t == null ? "" : t.toString()).put("x", x == null ? "" : x.toString())
+                        .put("w", s.getPostTime()));
+                }
+            } catch (Exception ignored) {}
+            return out.toString();
+        }
+
+        @JavascriptInterface
+        public void openNotif(String key) {
+            HubService h = HubService.inst;
+            if (h == null) return;
+            try {
+                for (StatusBarNotification s : h.getActiveNotifications()) {
+                    if (s.getKey().equals(key) && s.getNotification().contentIntent != null) {
+                        s.getNotification().contentIntent.send();
+                        return;
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+
+        @JavascriptInterface
+        public void dismiss(String key) {
+            HubService h = HubService.inst;
+            if (h != null) { try { h.cancelNotification(key); } catch (Exception ignored) {} }
+        }
+
+        @JavascriptInterface
+        public String status() {
+            boolean home = false, dark;
+            try {
+                ResolveInfo ri = getPackageManager().resolveActivity(
+                    new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME), 0x10000);
+                home = ri != null && getPackageName().equals(ri.activityInfo.packageName);
+            } catch (Exception ignored) {}
+            dark = (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                == Configuration.UI_MODE_NIGHT_YES;
+            return "{\"home\":" + home + ",\"dark\":" + dark + "}";
+        }
+
+        @JavascriptInterface
+        public String setWallpaper(String b64) {
+            try {
+                byte[] d = Base64.decode(b64, Base64.DEFAULT);
+                Bitmap bm = BitmapFactory.decodeByteArray(d, 0, d.length);
+                WallpaperManager.getInstance(MainActivity.this)
+                    .setBitmap(bm, null, true, WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK);
+                return "ok";
+            } catch (Exception e) {
+                return "error";
+            }
+        }
+
+        @JavascriptInterface
         public void haptic() {
             web.post(() -> web.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP));
         }
@@ -222,6 +318,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (cur == this) cur = null;
         try { unregisterReceiver(screenOff); unregisterReceiver(pkgChange); } catch (Exception ignored) {}
         super.onDestroy();
     }
